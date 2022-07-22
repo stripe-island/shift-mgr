@@ -1,0 +1,131 @@
+#! /usr/bin/perl
+
+use strict;
+use warnings;
+
+use CGI;
+use DBI;
+use Encode;
+use JSON::PP;
+use Switch;
+
+my $cgi = new CGI;
+
+
+if ($ENV{"REQUEST_METHOD"} eq "OPTIONS")
+{
+	print $cgi->header(
+		-access_control_allow_origin => "*",
+		-access_control_allow_headers => "Authorization",
+		-status => "204 No Content"
+	);
+	exit(0);
+}
+
+
+if($ENV{"HTTP_AUTHORIZATION"} eq "")
+{
+	print $cgi->header(
+		-access_control_allow_origin => "*",
+		-status => "401 Unauthorized",
+		-www_authenticate => "Bearer realm=\"\""
+	);
+}
+elsif($ENV{"HTTP_AUTHORIZATION"} =~ /^Bearer ([0-9]+)\/(.+)$/)
+{
+	my $dbh = DBI->connect(
+		"DBI:mysql:database=shift_mgr;host=localhost;mysql_server_prepare=1",
+		"xxxx",
+		"xxxxxxxxxxxxxxxx",
+		{AutoCommit => 1, PrintError => 0, RaiseError => 1}
+	);
+	my $sth;
+	my $user;
+
+	$sth = $dbh->prepare("SELECT * FROM employees WHERE number = ?;");
+	$sth->execute($1);
+	eval
+	{
+		$user = $sth->fetchrow_hashref() or die;
+		$user->{"resigned"} == 0 or die;
+		$user->{"password"} =~ /^\Q$2\E$/i or die;
+	};
+	if($@)
+	{
+		print $cgi->header(
+			-access_control_allow_origin => "*",
+			-status => "401 Unauthorized",
+			-www_authenticate => "Bearer error=\"invalid_token\""
+		);
+		exit;
+	}
+
+	switch($ENV{"REQUEST_METHOD"})
+	{
+		case "GET"
+		{
+			if($ENV{"PATH_INFO"} =~ /^\/(20[0-9]{6})$/)
+			{
+				my $shift;
+
+				$sth = $dbh->prepare(
+					"SELECT number, name, start, end FROM employees "
+				   ."INNER JOIN shifts ON employees.number = shifts.employee_number "
+				   ."WHERE date = ? ORDER BY start;"
+				);
+				$sth->execute($1);
+				if($shift = $sth->fetchrow_hashref())
+				{
+					my $response = {};
+					$response->{"permissions"}->{"edit"} = $user->{"edit"};
+					$response->{"permissions"}->{"recruit"} = $user->{"recruit"};
+					$response->{"shifts"} = [];
+					$shift->{"name"} = Encode::decode("utf-8", $shift->{"name"});
+					push(@{$response->{"shifts"}}, $shift);
+					while($shift = $sth->fetchrow_hashref())
+					{
+						$shift->{"name"} = Encode::decode("utf-8", $shift->{"name"});
+						push(@{$response->{"shifts"}}, $shift);
+					}
+
+					print $cgi->header(
+						-access_control_allow_origin => "*",
+						-status => "200 OK",
+						-type => "application/json; charset=utf-8",
+						-x_content_type_options => "nosniff"
+					);
+					print encode_json($response);
+				}
+				else
+				{
+					print $cgi->header(
+						-access_control_allow_origin => "*",
+						-status => "404 Not Found"
+					);
+				}
+			}
+			else
+			{
+				print $cgi->header(
+					-access_control_allow_origin => "*",
+					-status => "400 Bad Request"
+				);
+			}
+		}
+		else
+		{
+			print $cgi->header(
+				-access_control_allow_origin => "*",
+				-status => "405 Method Not Allowed"
+			);
+		}
+	}
+}
+else
+{
+	print $cgi->header(
+		-access_control_allow_origin => "*",
+		-status => "400 Bad Request",
+		-www_authenticate => "Bearer error=\"invalid_request\""
+	);
+}

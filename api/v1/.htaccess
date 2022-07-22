@@ -1,0 +1,10 @@
+
+Options +ExecCGI
+AddHandler cgi-script .cgi
+
+<FilesMatch "^(employees|shifts)$">
+	ForceType cgi-script
+</FilesMatch>
+
+RewriteEngine on
+RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]

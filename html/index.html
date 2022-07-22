@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>デモページ - シフトマネージャ</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="style.css">
+<script src="script.js"></script>
+<script>
+
+	var TIME_TABLE = [
+		730,
+		800,
+		830,
+		900,
+		930,
+		1000,
+		1030,
+		1100,
+		1130,
+		1200,
+		1230,
+		1300,
+		1330,
+		1400,
+		1430,
+		1500,
+		1530,
+		1600,
+		1630,
+		1700,
+		1730,
+		1800,
+		1830,
+		1900,
+		1930,
+		2000,
+		2030,
+		2100
+	];
+
+	var parentTable = null;
+	var childTable = null;
+	var dp = null;
+	var dialog = null;
+
+	window.addEventListener("load", function () {
+		parentTable = document.getElementsByTagName("table").item(1);
+		childTable = parentTable.getElementsByTagName("table").item(0);
+		dp = new DatePicker(document.getElementById("DatePicker"));
+		dp.setChangedListener(function () {
+			childTable.parentNode.setAttribute("rowspan", 1);
+			childTable.parentNode.scrollLeft = 0;
+			while(childTable.rows.length > 1) {
+				childTable.deleteRow(-1);
+			}
+			while(parentTable.rows.length > 1) {
+				parentTable.deleteRow(-1);
+			}
+			showShiftTable();
+		});
+		showShiftTable();
+	});
+
+	function showShiftTable() {
+		if(window.sessionStorage.getItem("number") == null) {
+			dialog = new LoginDialog();
+			dialog.setCallback(showShiftTable);
+			dialog.show();
+			return;
+		}
+		var xhr = new XMLHttpRequest();
+		xhr.addEventListener("loadend", function () {
+			switch(xhr.status) {
+				case 200:
+					if(dialog != null) {
+						dialog.dismiss();
+						dialog = null;
+					}
+					var response = JSON.parse(xhr.responseText);
+					var dataNum = response.shifts.length;
+					var sum = 0.0;
+					childTable.parentNode.setAttribute("rowspan", dataNum + 1);
+					childTable.parentNode.scrollLeft = 0;
+					for(var j = 0; j < dataNum; j++) {
+						var row = childTable.insertRow(-1);
+						var hours = 0.0;
+						for(var i = 0; i < 28; i++) {
+							var child = row.appendChild(document.createElement("td"));
+							if(response.shifts[j].start <= TIME_TABLE[i] && response.shifts[j].end > TIME_TABLE[i]) {
+								child.style.backgroundColor = "#0044CC";
+								hours += 0.5;
+							}
+						}
+						if(hours >= 11.0) {
+							hours -= 0.25;
+						}
+						if(hours >= 6.5 || (response.shifts[j].start <= 1130 && hours >= 5.0)) {
+							hours -= 0.5;
+						}
+						sum += hours;
+						parentTable.insertRow(-1)
+						.appendChild(document.createElement("th").setText(response.shifts[j].name)).parentNode
+						.appendChild(document.createElement("td").setText(hours.toString(10)));
+					}
+					parentTable.insertRow(-1)
+					.appendChild(document.createElement("th")).parentNode
+					.appendChild(document.createElement("td").setText(sum.toString(10))).parentNode
+					.appendChild(document.createElement("td"));
+					dp.setDisabled(false);
+					break;
+				case 401:
+					window.sessionStorage.clear();
+					dialog.setErrorMessage("社員番号、又はパスワードが違います。");
+					break;
+				case 404:
+					if(dialog != null) {
+						dialog.dismiss();
+						dialog = null;
+					}
+					Toast.makeText("シフトのデータがありません。").show();
+					dp.setDisabled(false);
+					break;
+			}
+		});
+        xhr.open("GET", "http://xxxxxxxxxxxxxx/shift-mgr/api/v1/shifts/" + dp.getDateString());
+		xhr.setRequestHeader(
+			"Authorization",
+			"Bearer " + window.sessionStorage.getItem("number") + "/" + window.sessionStorage.getItem("password")
+		);
+		xhr.send(null);
+	}
+
+</script>
+</head>
+<body>
+<header>
+	<h1><a href="/demo/shift-mgr/index.html">事業所名</a></h1>
+	<nav>
+		<ul>
+			<li><a href="/demo/shift-mgr/myshift.html">自分のシフト</a></li>
+		</ul>
+	</nav>
+</header>
+<div id="DatePicker">
+	<button type="button" disabled>&lt;</button><!-- 
+ --><p></p><!-- 
+ --><button type="button" disabled>&gt;</button><!-- 
+ --><button type="button" class="highlighted" disabled>↓</button>
+	<table>
+		<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+		<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+		<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+		<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+		<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+		<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+	</table>
+</div>
+<table>
+	<tr>
+		<th></th>
+		<th></th>
+		<td>
+			<table>
+				<thead>
+					<tr>
+						<th colspan="2">8:00</th>
+						<th colspan="2">9:00</th>
+						<th colspan="2">10:00</th>
+						<th colspan="2">11:00</th>
+						<th colspan="2">12:00</th>
+						<th colspan="2">13:00</th>
+						<th colspan="2">14:00</th>
+						<th colspan="2">15:00</th>
+						<th colspan="2">16:00</th>
+						<th colspan="2">17:00</th>
+						<th colspan="2">18:00</th>
+						<th colspan="2">19:00</th>
+						<th colspan="2">20:00</th>
+						<th colspan="2">21:00</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</td>
+	</tr>
+</table>
+<footer>&copy; 2015 Make.</footer>
+</body>
+</html>

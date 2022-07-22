@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>デモページ - シフトマネージャ</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="style.css">
+<script src="script.js"></script>
+<script>
+
+	var query = "?";
+	var dialog = null;
+
+	window.addEventListener("load", function () {
+		var d = new Date();
+		switch(d.getDay()) {
+			case 0:
+				d.setDate(d.getDate() - 6);
+				break;
+			case 1:
+				break;
+			default:
+				d.setDate(d.getDate() - d.getDay() + 1);
+		}
+		var table = document.getElementsByTagName("table").item(0);
+		var month = 0;
+		query = query + "since=" + d.getYYYYMMDD();
+		for(var i = 0; i < table.rows.length; i++) {
+			table.rows[i].setAttribute("id", d.getYYYYMMDD());
+			var date = d.getDate().toString(10);
+			if(month !== d.getMonth() + 1) {
+				month = d.getMonth() + 1;
+				date = month.toString(10) + "/" + date;
+			}
+			table.rows[i].getElementsByTagName("th").item(0).setText(date);
+			d.setDate(d.getDate() + 1);
+		}
+		d.setDate(d.getDate() - 1);
+		query = query + "&until=" + d.getYYYYMMDD();
+		showShiftList();
+	});
+
+	function showShiftList() {
+		if(window.sessionStorage.getItem("number") == null) {
+			dialog = new LoginDialog();
+			dialog.setCallback(showShiftList);
+			dialog.show();
+			return;
+		}
+		var xhr = new XMLHttpRequest();
+		xhr.addEventListener("loadend", function () {
+			switch(xhr.status) {
+				case 200:
+					if(dialog != null) {
+						dialog.dismiss();
+					}
+					var response = JSON.parse(xhr.responseText);
+					for(var i = 0; i < response.shifts.length; i++) {
+						var row = document.getElementById(response.shifts[i].date.toString(10));
+						var start = response.shifts[i].start.toString(10);
+						start = start.slice(0, (start.length < 4) ? 1 : 2) + ":" + start.slice((start.length < 4) ? 1 : 2);
+						var end = response.shifts[i].end.toString(10);
+						end = end.slice(0, (end.length < 4) ? 1 : 2) + ":" + end.slice((end.length < 4) ? 1 : 2);
+						row.getElementsByTagName("td").item(0).setText(start + "～" + end);
+					}
+					break;
+				case 401:
+					window.sessionStorage.clear();
+					dialog.setErrorMessage("社員番号、又はパスワードが違います。");
+					break;
+			}
+		});
+		xhr.open(
+			"GET",
+			"http://xxxxxxxxxxxxxx/shift-mgr/api/v1/employees/" +
+			window.sessionStorage.getItem("number") + 
+			"/shifts" + 
+			query
+		);
+		xhr.setRequestHeader(
+			"Authorization",
+			"Bearer " + window.sessionStorage.getItem("number") + "/" + window.sessionStorage.getItem("password")
+		);
+		xhr.send(null);
+	}
+
+</script>
+</head>
+<body>
+<header>
+	<h1><a href="/demo/shift-mgr/index.html">事業所名</a></h1>
+	<nav>
+		<ul>
+			<li class="browsed"><a href="/demo/shift-mgr/myshift.html">自分のシフト</a></li>
+		</ul>
+	</nav>
+</header>
+<table class="list">
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+	<tr><th></th><td>－</td></tr>
+</table>
+<footer>&copy; 2015 Make.</footer>
+</body>
+</html>

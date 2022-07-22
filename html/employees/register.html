@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>デモページ - シフトマネージャ</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../style.css">
+<script src="../script.js"></script>
+<script>
+
+	var employee = {};
+	var dialog = null;
+
+	window.addEventListener("load", function () {
+		document.getElementById("number").addEventListener("input", function () {
+			if(event.target.value.length > 4) {
+				event.target.value = event.target.value.slice(0, 4);
+			}
+		});
+		document.getElementsByTagName("button").item(0).addEventListener("click", function () {
+			employee.number = document.getElementById("number").value;
+			if(employee.number === "") {
+				Toast.makeText("社員番号を半角で入力してください。").show();
+				return;
+			}
+			employee.name = document.getElementById("name").value.trim();
+			if(employee.name === "") {
+				Toast.makeText("氏名を入力してください。").show();
+				return;
+			}
+			event.target.disabled = true;
+			event.target.setText("登録しています...");
+			registerEmployee();
+		});
+	});
+
+	function registerEmployee() {
+		if(window.sessionStorage.getItem("number") == null) {
+			dialog = new LoginDialog();
+			dialog.setCallback(registerEmployee);
+			dialog.show();
+			return;
+		}
+		var xhr = new XMLHttpRequest();
+		xhr.addEventListener("loadend", function () {
+			switch(xhr.status) {
+				case 201:
+					if(dialog != null) {
+						dialog.dismiss();
+					}
+					employee = JSON.parse(xhr.responseText);
+					document.body.replaceChild(
+						document.createElement("dl")
+						.appendChild(document.createElement("dt").setText("社員番号")).parentNode
+						.appendChild(document.createElement("dd").setText(employee.number)).parentNode
+						.appendChild(document.createElement("dt").setText("氏名")).parentNode
+						.appendChild(document.createElement("dd").setText(employee.name)).parentNode
+						.appendChild(document.createElement("dt").setText("パスワード")).parentNode
+						.appendChild(document.createElement("dd").setText(employee.password)).parentNode,
+						document.getElementsByTagName("form").item(0)
+					);
+					break;
+				case 401:
+					window.sessionStorage.clear();
+					dialog.setErrorMessage("社員番号、又はパスワードが違います。");
+					break;
+				case 403:
+					if(dialog != null) {
+						dialog.dismiss();
+					}
+					document.body.replaceChild(
+						document.createElement("p")
+						.setText("従業員を登録する権限がありません。")
+						.setAttribute("class", "error"),
+						document.getElementsByTagName("form").item(0)
+					);
+					break;
+				case 409:
+					if(dialog != null) {
+						dialog.dismiss();
+						dialog = null;
+					}
+					var button = document.getElementsByTagName("button").item(0);
+					button.disabled = false;
+					button.setText("登録");
+					Toast.makeText("既に社員番号、又は氏名が同一の従業員が登録されています。").show();
+					break;
+			}
+		});
+		xhr.open("POST", "http://xxxxxxxxxxxxxx/shift-mgr/api/v1/employees");
+		xhr.setRequestHeader(
+			"Authorization",
+			"Bearer " + window.sessionStorage.getItem("number") + "/" + window.sessionStorage.getItem("password")
+		);
+		xhr.send(JSON.stringify(employee));
+	}
+
+</script>
+</head>
+<body>
+<header>
+	<h1><a href="/demo/shift-mgr/index.html">事業所名</a></h1>
+</header>
+<h2>従業員登録</h2>
+<form>
+	<label for="number">社員番号</label>
+	<input type="number" id="number" placeholder="タップして入力">
+	<label for="name">氏名</label>
+	<input id="name" maxlength="10" placeholder="タップして入力">
+	<button type="button">登録</button>
+</form>
+<footer>&copy; 2015 Make.</footer>
+</body>
+</html>

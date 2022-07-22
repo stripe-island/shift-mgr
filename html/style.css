@@ -1,0 +1,334 @@
+@charset "utf-8";
+
+html {
+	height: 100%;
+}
+
+body {
+	background: #E3E3E3;
+	color: #333333;
+	font-family: "游ゴシック", YuGothic, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+	height: 100%;
+	margin: 0;
+}
+
+header {
+	background: #FFFFFF;
+}
+
+header h1 {
+	font-size: 1.1rem;
+	font-weight: normal;
+	height: 44px;
+	line-height: 44px;
+	margin: 0;
+	padding-left: 10px;
+}
+
+header h1 a {
+	color: #0044CC;
+}
+
+header nav ul {
+	margin: 0;
+	padding: 0;
+}
+
+header nav ul li {
+	display: inline-block;
+	width: 100%;
+}
+
+header nav ul li.browsed {
+	border-bottom: 2px solid #0044CC;
+	height: 42px;
+}
+
+header nav ul li a {
+	color: #333333;
+	display: block;
+	height: 44px;
+	line-height: 44px;
+	text-align: center;
+	text-decoration: none;
+}
+
+#DatePicker {
+	background: #FFFFFF;
+	margin-top: 7px;
+}
+
+#DatePicker p {
+	display: inline-block;
+	height: 44px;
+	line-height: 44px;
+	margin: 0;
+	text-align: center;
+	vertical-align: top;
+	width: 40%;
+}
+
+#DatePicker button {
+	background: #FFFFFF;
+	border-style: none;
+	color: #333333;
+	font-size: 0.9rem;
+	height: 44px;
+	padding: 0;
+	width: 20%;
+}
+
+#DatePicker button.highlighted {
+	background: #0044CC;
+	color: #FFFFFF;
+}
+
+#DatePicker table {
+	display: none;
+	margin-top: 0;
+}
+
+#DatePicker table tr td {
+	cursor: default;
+	height: 44px;
+}
+
+#DatePicker table tr td:nth-child(1) {
+	color: #CD0000;
+}
+
+#DatePicker table tr td:nth-child(7) {
+	color: #0044CC;
+}
+
+table {
+	background: #FFFFFF;
+	border-spacing: 0;
+	margin-top: 7px;
+	table-layout: fixed;
+	width: 100%;
+}
+
+table tr th {
+	height: 44px;
+	padding: 0;
+	white-space: nowrap;
+	width: 52px;
+}
+
+table tbody > tr > th:nth-child(1) {
+	overflow: hidden;
+	width: 6em;
+}
+
+table tr td {
+	line-height: 44px;
+	overflow-x: auto;
+	padding: 0;
+	text-align: center;
+	-webkit-overflow-scrolling: touch;
+}
+
+table tr td table {
+	margin-top: 0;
+}
+
+table tr td table tr th {
+	font-size: 0.9rem;
+	font-weight: normal;
+}
+
+table tr td table tr td {
+	border-right: 1px dotted #333333;
+	height: 44px;
+}
+
+table.list {
+	border-collapse: collapse;
+}
+
+table.list tr {
+	height: 50px;
+}
+
+table.list tr:nth-child(7n-1) {
+	background: #CDE6FF;
+}
+
+table.list tr:nth-child(7n) {
+	background: #FFCDCD;
+}
+
+table.list > tbody tr th {
+	border: 1px solid rgba(51, 51, 51, 0.3);
+	font-weight: normal;
+	width: 20%;
+}
+
+table.list tr td {
+	border: 1px solid rgba(51, 51, 51, 0.3);
+	font-size: 1.2rem;
+}
+
+h2 {
+	font-size: 1.3rem;
+	background: #FFFFFF;
+	height: 44px;
+	line-height: 44px;
+	margin: 7px 0 0 0;
+	padding-left: 10px;
+}
+
+form {
+	background: #FFFFFF;
+	padding: 0 7px 7px 7px;
+}
+
+form label {
+	display: block;
+	font-size: 1.1rem;
+	height: 44px;
+	line-height: 44px;
+	padding-left: 3px;
+}
+
+form input {
+	border-style: none;
+	display: block;
+	font-size: 1.5rem;
+	height: 44px;
+	margin: 0 auto;
+	padding: 0;
+	width: 95%;
+}
+
+form button {
+	font-size: 1.1rem;
+	height: 44px;
+	margin-top: 21px;
+	width: 100%;
+}
+
+dl {
+	background: #FFFFFF;
+	margin: 0;
+	padding: 0 7px 7px 7px;
+}
+
+dl dt {
+	font-size: 1.1rem;
+	height: 44px;
+	line-height: 44px;
+	padding-left: 3px;
+}
+
+dl dd {
+	font-size: 1.4rem;
+	height: 44px;
+	line-height: 44px;
+	margin: 0 10px;
+}
+
+p.error {
+	background: #FFFFFF;
+	color: #CD0000;
+	height: 228px;
+	margin: 0;
+	padding: 10px;
+}
+
+footer {
+	background: #FFFFFF;
+	font-size: 0.9rem;
+	height: 44px;
+	margin-top: 7px;
+	text-align: center;
+}
+
+p.toast {
+	animation-duration: 5.0s;
+	animation-name: toast;
+	background: #FFCDCD;
+	border: 1px solid #CD0000;
+	box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+	box-sizing: border-box;
+	color: #CD0000;
+	font-size: 1.1rem;
+	left: 5%;
+	margin: 0;
+	padding: 10px;
+	position: fixed;
+	top: 22px;
+	width: 90%;
+}
+
+@keyframes toast {
+	0% {
+		opacity: 0;
+	}
+	15% {
+		opacity: 1;
+	}
+	75% {
+		opacity: 1;
+	}
+	100%{
+		opacity: 0;
+	}
+}
+
+div.dialog {
+	animation-duration: 1.0s;
+	animation-name: fadein;
+	background: rgba(0, 0, 0, 0.5);
+	height: 120%;
+	left: 0;
+	position: fixed;
+	top: 0;
+	width: 100%;
+}
+
+div.dialog form {
+	margin: 44px auto;
+	max-width: 800px;
+	padding: 0;
+	width: 80%;
+}
+
+div.dialog form label {
+	font-size: 1.0rem;
+	padding-left: 10px;
+}
+
+div.dialog form input {
+	font-size: 1.4rem;
+	width: 90%;
+}
+
+div.dialog form p {
+	color: #CD0000;
+	font-size: 0.8rem;
+	height: 44px;
+	line-height: 44px;
+	margin: 0;
+	padding-left: 10px;
+}
+
+div.dialog form button {
+	background: #0044CC;
+	border-style: none;
+	color: #FFFFFF;
+	display: block;
+	font-size: 1.0rem;
+	margin: 0;
+	padding: 0;
+}
+
+@keyframes fadein {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
